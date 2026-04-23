@@ -1,0 +1,101 @@
+---
+import { getImage } from "astro:assets";
+import { Portfolio } from "../../components/Portfolio";
+import portraitSrc from "../../assets/portrait.jpg";
+import "../../styles/global.css";
+
+const siteUrl = "https://kamilkurdziel.me";
+const pageUrl = `${siteUrl}/pl/`;
+const title = "Kamil Kurdziel — .NET Lead Engineer | Mentor & CTO";
+const description =
+  "Buduję skalowalne systemy backendowe i prowadzę zespoły inżynierskie. " +
+  "Eksploruję możliwości AI w wytwarzaniu oprogramowania.";
+const ogImage = `${siteUrl}/og-image.svg`;
+
+const portraitWebp = await getImage({
+  src: portraitSrc,
+  width: 800,
+  height: 1000,
+  format: "webp",
+  quality: 82,
+});
+const portraitJpg = await getImage({
+  src: portraitSrc,
+  width: 800,
+  height: 1000,
+  format: "jpg",
+  quality: 84,
+});
+
+const personLd = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: "Kamil Kurdziel",
+  url: pageUrl,
+  image: ogImage,
+  jobTitle: ".NET Lead Engineer",
+  email: "mailto:contact@kamilkurdziel.me",
+  sameAs: [
+    "https://github.com/k-kurdziel",
+    "https://www.linkedin.com/in/kamil-kurdziel-9485ba267/",
+  ],
+  knowsAbout: [".NET", "C#", "Backend", "AI", "Engineering Leadership", "IoT"],
+  inLanguage: "pl-PL",
+};
+---
+
+<!doctype html>
+<html lang="pl">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="description" content={description} />
+    <meta name="author" content="Kamil Kurdziel" />
+    <meta name="robots" content="index, follow" />
+    <meta name="theme-color" content="#0d0d0b" />
+    <title>{title}</title>
+
+    <link rel="canonical" href={pageUrl} />
+    <link rel="alternate" hreflang="pl" href={`${siteUrl}/pl/`} />
+    <link rel="alternate" hreflang="en" href={`${siteUrl}/en/`} />
+    <link rel="alternate" hreflang="x-default" href={`${siteUrl}/`} />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Kamil Kurdziel" />
+    <meta property="og:url" content={pageUrl} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:locale" content="pl_PL" />
+    <meta property="og:locale:alternate" content="en_US" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content={pageUrl} />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(personLd)} />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@300;400;500;600;700&family=Geist+Mono:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&family=Fira+Code:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <Portfolio
+      client:load
+      portraitWebp={portraitWebp.src}
+      portraitJpg={portraitJpg.src}
+      initialLang="pl"
+    />
+  </body>
+</html>

@@ -1,0 +1,28 @@
+---
+const siteUrl = "https://kamilkurdziel.me";
+---
+
+<!doctype html>
+<html lang="pl">
+  <head>
+    <meta charset="utf-8" />
+    <title>Kamil Kurdziel</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="alternate" hreflang="pl" href={`${siteUrl}/pl/`} />
+    <link rel="alternate" hreflang="en" href={`${siteUrl}/en/`} />
+    <link rel="alternate" hreflang="x-default" href={`${siteUrl}/en/`} />
+    <script is:inline>
+      (function () {
+        var lang = (navigator.language || (navigator.languages && navigator.languages[0]) || "").toLowerCase();
+        var target = lang.indexOf("pl") === 0 ? "/pl/" : "/en/";
+        location.replace(target);
+      })();
+    </script>
+    <noscript>
+      <meta http-equiv="refresh" content="0; url=/en/" />
+    </noscript>
+  </head>
+  <body></body>
+</html>

@@ -1,0 +1,8 @@
+services:
+  portfolio:
+    image: ghcr.io/k-kurdziel/portfolio:${IMAGE_TAG}
+    container_name: portfolio
+    restart: unless-stopped
+    ports:
+      # Only localhost — nginx on the host proxies :443 → this
+      - "127.0.0.1:3000:80"
