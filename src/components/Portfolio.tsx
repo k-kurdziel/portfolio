@@ -218,6 +218,7 @@ export function Portfolio({
   const lang: Lang = initialLang ?? DEFAULT_LANG;
   const [booting, setBooting] = useState(true);
   const [version, setVersion] = useState("");
+  const [asciiLogo, setAsciiLogo] = useState("");
 
   useEffect(() => {
     const reduced = window.matchMedia?.(
@@ -225,6 +226,9 @@ export function Portfolio({
     ).matches;
     if (reduced) setBooting(false);
     setVersion(buildVersion());
+    setAsciiLogo(
+      ` _  _    _  __  __  ___  _\n| |/ /  / \\|  \\/  ||_ _|| |\n| ' /  / _ \\ |\\/| | | | | |\n| . \\ / ___ \\|  | | | | | |___\n|_|\\_/_/   \\_\\_|  |_||___||_____|`,
+    );
   }, []);
 
   const finishBoot = useCallback(() => {
@@ -368,8 +372,10 @@ export function Portfolio({
                 {ui.identityCat}
               </div>
 
-              {/* Cell 2 — ASCII KAMIL (1 cell) */}
+              {/* Cell 2 — ASCII KAMIL (1 cell, client-only to avoid SEO indexing) */}
               <pre
+                aria-hidden="true"
+                data-nosnippet
                 style={{
                   margin: 0,
                   height: 52,
@@ -382,11 +388,7 @@ export function Portfolio({
                   overflow: "hidden",
                 }}
               >
-{` _  _    _  __  __  ___  _
-| |/ /  / \\|  \\/  ||_ _|| |
-| ' /  / _ \\ |\\/| | | | | |
-| . \\ / ___ \\|  | | | | | |___
-|_|\\_/_/   \\_\\_|  |_||___||_____|`}
+                {asciiLogo}
               </pre>
 
               {/* Cell 3 — spacer */}
