@@ -191,12 +191,12 @@ function CopyableEmail({
 
 function SecH({ idx, title, right }: { idx: string; title: string; right?: string }) {
   return (
-    <div className="sec-h">
+    <h2 className="sec-h">
       <span className="idx">[{idx}]</span>
       <span className="title">{title}</span>
       <span className="spacer" />
       {right && <span className="right">{right}</span>}
-    </div>
+    </h2>
   );
 }
 
@@ -698,16 +698,17 @@ export function Portfolio({
                   </div>
                 </div>
                 <div>
-                  <div
+                  <h3
                     style={{
                       color: "var(--ink)",
                       fontSize: 15,
                       fontWeight: 600,
                       letterSpacing: ".02em",
+                      margin: 0,
                     }}
                   >
                     {i18n?.title}
-                  </div>
+                  </h3>
                   <div
                     style={{
                       color: "var(--muted)",
@@ -789,17 +790,18 @@ export function Portfolio({
                   }}
                 >
                   <div>
-                    <div
+                    <h3
                       style={{
                         color: "var(--ink)",
                         fontSize: 28,
                         fontWeight: 700,
                         letterSpacing: "-.01em",
                         lineHeight: 1,
+                        margin: 0,
                       }}
                     >
                       GREEN<span style={{ color: "var(--accent)" }}>/</span>GUARD
-                    </div>
+                    </h3>
                     <div
                       style={{
                         marginTop: 6,

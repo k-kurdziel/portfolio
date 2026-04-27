@@ -18,7 +18,7 @@
     <text x="32" y="35" fill="#b5ff3a">▮</text>
     <text x="58" y="35" fill="#e6e3d8">kamil@portfolio</text>
     <text x="216" y="35" fill="#44413a">:~$</text>
-    <text x="252" y="35" fill="#6e6a5e">whoami --verbose</text>
+    <text x="252" y="35" fill="#6e6a5e">whoami</text>
     <text x="1090" y="35" fill="#b5ff3a">● ONLINE</text>
   </g>
 
@@ -50,7 +50,7 @@
   <rect x="0" y="605" width="1200" height="1" fill="#2a2823"/>
   <g font-family="JetBrains Mono, ui-monospace, monospace" font-size="13" fill="#6e6a5e">
     <text x="32" y="623">// kamil@portfolio · kamilkurdziel.me</text>
-    <text x="1090" y="623" fill="#b5ff3a">BOOKED</text>
+    <text x="1010" y="623" fill="#b5ff3a">OPEN TO OFFERS</text>
   </g>
 
   <!-- scanlines overlay -->
