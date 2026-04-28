@@ -15,6 +15,19 @@ export default defineConfig({
         locales: { pl: 'pl-PL', en: 'en-US' },
       },
       filter: (page) => !/^https:\/\/kamilkurdziel\.me\/?$/.test(page),
+      serialize(item) {
+        item.lastmod = new Date().toISOString();
+        if (item.links && item.links.length > 0) {
+          const hasXDefault = item.links.some((l) => l.lang === 'x-default');
+          if (!hasXDefault) {
+            const enLink = item.links.find((l) => l.lang === 'en-US');
+            if (enLink) {
+              item.links.push({ lang: 'x-default', url: enLink.url });
+            }
+          }
+        }
+        return item;
+      },
     }),
   ],
 });
