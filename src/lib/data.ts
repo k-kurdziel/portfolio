@@ -37,6 +37,21 @@ export type Social = {
   label: string;
 };
 
+export type EducationEntry = {
+  id: string;
+  start: string;
+  end: string | null;
+  endKey: EndKey;
+};
+
+export type EventEntry = {
+  id: string;
+  date: string;
+  endDate?: string;
+  role: "mentor" | "attendee";
+  hasImage: boolean;
+};
+
 export type StaticData = {
   startYear: number;
   years: number;
@@ -50,6 +65,8 @@ export type StaticData = {
     classified: string[];
   };
   stack: StackGroup[];
+  education: EducationEntry[];
+  events: EventEntry[];
 };
 
 export const PORTFOLIO_STATIC: StaticData = {
@@ -181,6 +198,41 @@ export const PORTFOLIO_STATIC: StaticData = {
       items: ["Lead Engineer", "Code Review", "Mentoring"],
     },
   ],
+  education: [
+    {
+      id: "zst-strzyzow",
+      start: "2020",
+      end: "2025",
+      endKey: null,
+    },
+    {
+      id: "wsiiz-rzeszow",
+      start: "2025",
+      end: null,
+      endKey: "now",
+    },
+  ],
+  events: [
+    {
+      id: "vibe-the-future",
+      date: "2026-05-22",
+      endDate: "2026-05-23",
+      role: "mentor",
+      hasImage: true,
+    },
+    {
+      id: "craftit-2025",
+      date: "2025-05-31",
+      role: "attendee",
+      hasImage: false,
+    },
+    {
+      id: "boiling-frogs-2026",
+      date: "2026-03-21",
+      role: "attendee",
+      hasImage: true,
+    },
+  ],
 };
 
 type I18NContent = {
@@ -189,7 +241,21 @@ type I18NContent = {
     exp: string;
     work: string;
     stack: string;
+    education: string;
+    events: string;
     contact: string;
+  };
+  education: {
+    sectionTitle: string;
+    sectionRight: string;
+    schools: Record<string, { school: string; field: string }>;
+  };
+  events: {
+    sectionTitle: string;
+    sectionRight: string;
+    roles: { mentor: string; attendee: string };
+    items: Record<string, { name: string; location: string }>;
+    noPhoto: string;
   };
   role: string;
   tagline: string;
@@ -229,7 +295,43 @@ export const PORTFOLIO_I18N: Record<Lang, I18NContent> = {
       exp: "--experience",
       work: "--work",
       stack: "--stack",
+      education: "--education",
+      events: "--events",
       contact: "--contact",
+    },
+    education: {
+      sectionTitle: "// education.log",
+      sectionRight: "cat ~/edu.txt",
+      schools: {
+        "zst-strzyzow": {
+          school: "Zespół Szkół Technicznych w Strzyżowie",
+          field: "Technik Programista",
+        },
+        "wsiiz-rzeszow": {
+          school: "Wyższa Szkoła Informatyki i Zarządzania w Rzeszowie",
+          field: "Informatyka",
+        },
+      },
+    },
+    events: {
+      sectionTitle: "// events.log",
+      sectionRight: "ls ~/conferences",
+      roles: { mentor: "MENTOR", attendee: "UCZESTNIK" },
+      items: {
+        "vibe-the-future": {
+          name: "Vibe the Future",
+          location: "Rzeszów, Polska",
+        },
+        "boiling-frogs-2026": {
+          name: "Boiling Frogs 2026",
+          location: "Wrocław, Polska",
+        },
+        "craftit-2025": {
+          name: "CraftIT 2025",
+          location: "Rzeszów, Polska",
+        },
+      },
+      noPhoto: "BRAK ZDJĘCIA",
     },
     role: ".NET Lead Engineer | Mentor & CTO",
     tagline:
@@ -338,7 +440,43 @@ export const PORTFOLIO_I18N: Record<Lang, I18NContent> = {
       exp: "--experience",
       work: "--work",
       stack: "--stack",
+      education: "--education",
+      events: "--events",
       contact: "--contact",
+    },
+    education: {
+      sectionTitle: "// education.log",
+      sectionRight: "cat ~/edu.txt",
+      schools: {
+        "zst-strzyzow": {
+          school: "Zespół Szkół Technicznych w Strzyżowie",
+          field: "Programming Technician",
+        },
+        "wsiiz-rzeszow": {
+          school: "Wyższa Szkoła Informatyki i Zarządzania w Rzeszowie",
+          field: "Computer Science",
+        },
+      },
+    },
+    events: {
+      sectionTitle: "// events.log",
+      sectionRight: "ls ~/conferences",
+      roles: { mentor: "MENTOR", attendee: "ATTENDEE" },
+      items: {
+        "vibe-the-future": {
+          name: "Vibe the Future",
+          location: "Rzeszów, Poland",
+        },
+        "boiling-frogs-2026": {
+          name: "Boiling Frogs 2026",
+          location: "Wrocław, Poland",
+        },
+        "craftit-2025": {
+          name: "CraftIT 2025",
+          location: "Rzeszów, Poland",
+        },
+      },
+      noPhoto: "NO PHOTO",
     },
     role: ".NET Lead Engineer | Mentor & CTO",
     tagline:

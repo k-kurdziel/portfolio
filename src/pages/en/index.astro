@@ -1,7 +1,9 @@
 ---
 import { getImage } from "astro:assets";
 import { Portfolio } from "../../components/Portfolio";
-import portraitSrc from "../../assets/portrait.jpg";
+import vibeImg from "../../assets/events/vibe-the-future.jpg";
+const portraitSrc = vibeImg;
+import boilingImg from "../../assets/events/boiling-frogs.png";
 import "../../styles/global.css";
 
 const siteUrl = "https://kamilkurdziel.me";
@@ -28,6 +30,23 @@ const portraitJpg = await getImage({
   quality: 84,
 });
 
+const vibeProcessed = await getImage({
+  src: vibeImg,
+  width: 800,
+  format: "webp",
+  quality: 80,
+});
+const boilingProcessed = await getImage({
+  src: boilingImg,
+  width: 800,
+  format: "webp",
+  quality: 80,
+});
+const eventImages = {
+  "vibe-the-future": vibeProcessed.src,
+  "boiling-frogs-2026": boilingProcessed.src,
+};
+
 const personLd = {
   "@context": "https://schema.org",
   "@type": "Person",
@@ -50,7 +69,7 @@ const personLd = {
   <head>
     <meta charset="utf-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="generator" content={Astro.generator} />
     <meta name="description" content={description} />
     <meta name="author" content="Kamil Kurdziel" />
@@ -96,6 +115,7 @@ const personLd = {
       client:load
       portraitWebp={portraitWebp.src}
       portraitJpg={portraitJpg.src}
+      eventImages={eventImages}
       initialLang="en"
     />
   </body>

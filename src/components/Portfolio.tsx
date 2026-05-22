@@ -189,6 +189,89 @@ function CopyableEmail({
   );
 }
 
+const CODE39: Record<string, string> = {
+  "0": "000110100", "1": "100100001", "2": "001100001", "3": "101100000",
+  "4": "000110001", "5": "100110000", "6": "001110000", "7": "000100101",
+  "8": "100100100", "9": "001100100",
+  A: "100001001", B: "001001001", C: "101001000", D: "000011001",
+  E: "100011000", F: "001011000", G: "000001101", H: "100001100",
+  I: "001001100", J: "000011100", K: "100000011", L: "001000011",
+  M: "101000010", N: "000010011", O: "100010010", P: "001010010",
+  Q: "000000111", R: "100000110", S: "001000110", T: "000010110",
+  U: "110000001", V: "011000001", W: "111000000", X: "010010001",
+  Y: "110010000", Z: "011010000",
+  "-": "010000101", ".": "110000100", " ": "011000100",
+  "*": "010010100",
+};
+
+function Code39Barcode({ value, height = 32 }: { value: string; height?: number }) {
+  const narrow = 2;
+  const wide = 5;
+  const gap = narrow;
+  const text = `*${value.toUpperCase().replace(/[^0-9A-Z .\-]/g, " ")}*`;
+  const bars: { x: number; w: number }[] = [];
+  let x = 0;
+  for (let c = 0; c < text.length; c++) {
+    const pattern = CODE39[text[c]];
+    if (!pattern) continue;
+    for (let i = 0; i < 9; i++) {
+      const w = pattern[i] === "1" ? wide : narrow;
+      if (i % 2 === 0) bars.push({ x, w });
+      x += w;
+    }
+    x += gap;
+  }
+  const totalWidth = x;
+  return (
+    <svg
+      className="badge-barcode-svg"
+      viewBox={`0 0 ${totalWidth} ${height}`}
+      preserveAspectRatio="none"
+      role="img"
+      aria-label={`barcode: ${value}`}
+    >
+      {bars.map((b, i) => (
+        <rect key={i} x={b.x} y={0} width={b.w} height={height} fill="currentColor" />
+      ))}
+    </svg>
+  );
+}
+
+function EventGlitch() {
+  return (
+    <div className="event-glitch" aria-hidden="true">
+      <div className="event-glitch-label">
+        <span className="event-glitch-label-main">NO SIGNAL</span>
+        <span className="event-glitch-label-sub">// 0xDEADBEEF</span>
+      </div>
+    </div>
+  );
+}
+
+function formatEventDate(
+  startIso: string,
+  endIso: string | undefined,
+  lang: Lang,
+): string {
+  const locale = lang === "pl" ? "pl-PL" : "en-GB";
+  const start = new Date(startIso + "T00:00:00");
+  const fmtFull = new Intl.DateTimeFormat(locale, {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+  if (!endIso) return fmtFull.format(start).toUpperCase();
+  const end = new Date(endIso + "T00:00:00");
+  const sameMonth =
+    start.getFullYear() === end.getFullYear() &&
+    start.getMonth() === end.getMonth();
+  if (sameMonth) {
+    const day = new Intl.DateTimeFormat(locale, { day: "2-digit" }).format(start);
+    return `${day}–${fmtFull.format(end)}`.toUpperCase();
+  }
+  return `${fmtFull.format(start)} – ${fmtFull.format(end)}`.toUpperCase();
+}
+
 function SecH({ idx, title, right }: { idx: string; title: string; right?: string }) {
   return (
     <h2 className="sec-h">
@@ -207,15 +290,17 @@ function Tok({ children }: { children: React.ReactNode }) {
 type PortfolioProps = {
   portraitWebp?: string;
   portraitJpg?: string;
+  eventImages?: Record<string, string>;
   initialLang?: Lang;
 };
 
 export function Portfolio({
   portraitWebp,
   portraitJpg,
+  eventImages,
   initialLang,
 }: PortfolioProps = {}) {
-  const lang: Lang = initialLang ?? DEFAULT_LANG;
+  const [lang, setLang] = useState<Lang>(initialLang ?? DEFAULT_LANG);
   const [booting, setBooting] = useState(true);
   const [version, setVersion] = useState("");
   const [asciiLogo, setAsciiLogo] = useState("");
@@ -225,6 +310,12 @@ export function Portfolio({
       "(prefers-reduced-motion: reduce)",
     ).matches;
     if (reduced) setBooting(false);
+    const alwaysShow = import.meta.env.PUBLIC_BOOT_INTRO_ALWAYS === "true";
+    if (!alwaysShow) {
+      try {
+        if (localStorage.getItem("bootIntroSeen") === "1") setBooting(false);
+      } catch {}
+    }
     setVersion(buildVersion());
     setAsciiLogo(
       ` _  _    _  __  __  ___  _\n| |/ /  / \\|  \\/  ||_ _|| |\n| ' /  / _ \\ |\\/| | | | | |\n| . \\ / ___ \\|  | | | | | |___\n|_|\\_/_/   \\_\\_|  |_||___||_____|`,
@@ -233,6 +324,36 @@ export function Portfolio({
 
   const finishBoot = useCallback(() => {
     setBooting(false);
+    try {
+      localStorage.setItem("bootIntroSeen", "1");
+    } catch {}
+  }, []);
+
+  const switchLang = useCallback((next: Lang) => {
+    setLang((prev) => {
+      if (prev === next) return prev;
+      const path = `/${next}/`;
+      try {
+        window.history.pushState({ lang: next }, "", path);
+      } catch {}
+      if (typeof document !== "undefined") {
+        document.documentElement.lang = next;
+      }
+      return next;
+    });
+  }, []);
+
+  useEffect(() => {
+    const onPop = () => {
+      const m = window.location.pathname.match(/^\/(pl|en)\//);
+      if (m) {
+        const next = m[1] as Lang;
+        setLang(next);
+        document.documentElement.lang = next;
+      }
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
   }, []);
 
   const t = PORTFOLIO_I18N[lang];
@@ -249,7 +370,8 @@ export function Portfolio({
         {/* Command bar */}
         <header
           style={{
-            padding: "12px var(--pad-x)",
+            padding:
+              "calc(12px + env(safe-area-inset-top)) calc(var(--pad-x) + env(safe-area-inset-right)) 12px calc(var(--pad-x) + env(safe-area-inset-left))",
             borderBottom: "1px solid var(--rule)",
             display: "flex",
             justifyContent: "space-between",
@@ -299,6 +421,12 @@ export function Portfolio({
             <a href="#stack" style={{ textDecoration: "none" }}>
               {t.nav.stack}
             </a>
+            <a href="#education" style={{ textDecoration: "none" }}>
+              {t.nav.education}
+            </a>
+            <a href="#events" style={{ textDecoration: "none" }}>
+              {t.nav.events}
+            </a>
             <a href="#contact" style={{ textDecoration: "none" }}>
               {t.nav.contact}
             </a>
@@ -315,13 +443,13 @@ export function Portfolio({
             <div className="lang-toggle" role="group" aria-label="language">
               <button
                 className={lang === "pl" ? "on" : ""}
-                onClick={() => window.location.assign("/pl/")}
+                onClick={() => switchLang("pl")}
               >
                 PL
               </button>
               <button
                 className={lang === "en" ? "on" : ""}
-                onClick={() => window.location.assign("/en/")}
+                onClick={() => switchLang("en")}
               >
                 EN
               </button>
@@ -433,6 +561,7 @@ export function Portfolio({
 
               {/* Cells 8-9 — tagline (2 cells = 104px), centered */}
               <p
+                className="hero-tagline"
                 style={{
                   margin: 0,
                   height: 104,
@@ -557,13 +686,24 @@ export function Portfolio({
                   .NET Lead Engineer
                 </dd>
                 <dt style={{ color: "var(--muted)", letterSpacing: ".18em" }}>
-                  STATUS
+                  ENERGY
                 </dt>
-                <dd style={{ margin: 0, color: "var(--accent2)" }}>OPEN TO OFFERS</dd>
-                <dt style={{ color: "var(--muted)", letterSpacing: ".18em" }}>
-                  STACK
-                </dt>
-                <dd style={{ margin: 0, color: "var(--ink)" }}>.NET · AI</dd>
+                <dd
+                  style={{
+                    margin: 0,
+                    fontVariantNumeric: "tabular-nums",
+                    whiteSpace: "nowrap",
+                    overflow: "visible",
+                  }}
+                >
+                  <span style={{ color: "var(--accent)" }}>[██████████]</span>
+                  <span
+                    className="blink"
+                    style={{ color: "var(--accent2)" }}
+                  >
+                    ██▓▒░
+                  </span>
+                </dd>
               </dl>
             </aside>
           </div>
@@ -975,9 +1115,157 @@ export function Portfolio({
           </div>
         </section>
 
+        {/* Education */}
+        <section id="education" style={{ padding: "0 var(--pad-x)" }}>
+          <SecH
+            idx="06"
+            title={t.education.sectionTitle}
+            right={t.education.sectionRight}
+          />
+          {[...s.education].reverse().map((edu, i) => {
+            const originalIdx = s.education.length - 1 - i;
+            const i18n = t.education.schools[edu.id];
+            const endLabel = edu.endKey
+              ? t.experience.endLabels[edu.endKey]
+              : edu.end ?? null;
+            const period = endLabel ? `${edu.start} — ${endLabel}` : edu.start;
+            const isOngoing = edu.endKey === "now";
+            return (
+              <div className="exp-row" key={edu.id}>
+                <div>
+                  <div
+                    style={{
+                      color: isOngoing ? "var(--accent2)" : "var(--accent)",
+                      fontSize: 13,
+                      letterSpacing: ".12em",
+                    }}
+                  >
+                    {period}
+                  </div>
+                  <div
+                    style={{
+                      color: "var(--muted)",
+                      fontSize: 11,
+                      marginTop: 4,
+                      letterSpacing: ".18em",
+                    }}
+                  >
+                    {i18n?.field}
+                  </div>
+                </div>
+                <div>
+                  <h3
+                    style={{
+                      color: "var(--ink)",
+                      fontSize: 15,
+                      fontWeight: 600,
+                      letterSpacing: ".02em",
+                      margin: 0,
+                    }}
+                  >
+                    {i18n?.school}
+                  </h3>
+                </div>
+                <div
+                  style={{
+                    color: "var(--muted)",
+                    fontSize: 11,
+                    letterSpacing: ".14em",
+                    textAlign: "right",
+                  }}
+                >
+                  <div>#{String(originalIdx + 1).padStart(2, "0")}</div>
+                </div>
+              </div>
+            );
+          })}
+        </section>
+
+        {/* Events */}
+        <section id="events" style={{ padding: "0 var(--pad-x)" }}>
+          <SecH
+            idx="07"
+            title={t.events.sectionTitle}
+            right={t.events.sectionRight}
+          />
+          <div
+            className="events-grid"
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(3, 1fr)",
+              gap: 20,
+              padding: "var(--row-pad) 0 32px",
+            }}
+          >
+            {[...s.events]
+              .sort((a, b) => (a.date < b.date ? 1 : -1))
+              .map((ev) => {
+                const i18n = t.events.items[ev.id];
+                const img = ev.hasImage ? eventImages?.[ev.id] : undefined;
+                const isMentor = ev.role === "mentor";
+                return (
+                  <article
+                    key={ev.id}
+                    className={`badge ${isMentor ? "badge--mentor" : "badge--attendee"}`}
+                  >
+                    <div className="badge-body">
+                      <div className="badge-head">
+                        <div className="badge-head-meta">
+                          <span className="badge-head-event">
+                            // {i18n?.name}
+                          </span>
+                          <span className="badge-head-loc">
+                            {i18n?.location}
+                          </span>
+                        </div>
+                        <span className="badge-head-year">
+                          {ev.date.slice(0, 4)}
+                        </span>
+                      </div>
+
+                      <div className="badge-photo">
+                        {img ? (
+                          <img
+                            src={img}
+                            alt={i18n?.name ?? ev.id}
+                            loading="lazy"
+                            decoding="async"
+                          />
+                        ) : (
+                          <EventGlitch />
+                        )}
+                      </div>
+
+                      <dl className="badge-fields">
+                        <dt>DATE</dt>
+                        <dd>{formatEventDate(ev.date, ev.endDate, lang)}</dd>
+                        <dt>ROLE</dt>
+                        <dd className="badge-fields-role">
+                          {isMentor
+                            ? t.events.roles.mentor
+                            : t.events.roles.attendee}
+                        </dd>
+                      </dl>
+
+                      <div className="badge-foot">
+                        <div className="badge-barcode">
+                          <Code39Barcode value={i18n?.name ?? ev.id} />
+                          <span className="badge-barcode-label">
+                            {(i18n?.name ?? ev.id).toUpperCase()}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="badge-perf" aria-hidden="true" />
+                  </article>
+                );
+              })}
+          </div>
+        </section>
+
         {/* Contact */}
         <section id="contact" style={{ padding: "0 var(--pad-x)" }}>
-          <SecH idx="06" title={`// ${t.contact.title}`} right="mail -s hello" />
+          <SecH idx="08" title={`// ${t.contact.title}`} right="mail -s hello" />
           <div
             style={{
               display: "flex",
